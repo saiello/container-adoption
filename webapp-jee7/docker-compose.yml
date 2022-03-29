@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+
+  webapp:
+    build: .
+    ports:
+      - 8080:8080
+      - 8778:8778
+    environment:
+      ENABLE_ACCESS_LOG: 'true'
