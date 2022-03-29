@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+
+  webapp:
+    build: .
+    ports:
+      - 8080:8080
+      - 8778:8778
+    environment:
+      LOGGING_SCRIPT_DEBUG: 'false'
+      ENABLE_ACCESS_LOG: 'true'
+      # see: https://github.com/AmadeusITGroup/HttpSessionReplacer/blob/master/session-agent/src/main/java/com/amadeus/session/agent/SessionAgent.java
+      CATALINA_OPTS: >-
+        -javaagent:/opt/jws-5.6/tomcat/lib/session-agent.jar
+        -Dcom.amadeus.session.namespace=APPNAME
+        -Dcom.amadeus.session.redis.mode=SINGLE
+        -Dcom.amadeus.session.redis.port=6379
+        -Dcom.amadeus.session.redis.expiration=ZRANGE
+        -Dcom.amadeus.session.sticky=false
+        -Dcom.amadeus.session.redis.host=redis
+        -Dcom.amadeus.session.repository.factory=com.amadeus.session.repository.redis.JedisSessionRepositoryFactory
+        -Dcom.amadeus.session.distributable=true
+        -Dcom.amadeus.session.disable=false
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:6.2.6-alpine
+    ports:
+      - 6379:6379
+
+  redis-monitor:
+    image: redis:6.2.6-alpine
+    command: "redis-cli -h redis monitor"
+    depends_on:
+      - redis
