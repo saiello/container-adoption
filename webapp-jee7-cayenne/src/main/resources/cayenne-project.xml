@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<domain project-version="6">
+    <property name="cayenne.DataDomain.usingExternalTransactions" value="false"/>
+    <map name="datamap"/>
+    <node name="datanode" factory="org.apache.cayenne.configuration.server.JNDIDataSourceFactory" parameters="jdbc/oracledb">
+        <map-ref name="datamap"/>
+    </node>
+</domain>

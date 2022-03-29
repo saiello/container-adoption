@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+  webapp:
+    build: .
+    ports:
+      - 8080:8080
+      - 8778:8778
+    environment:
+      CATALINA_OPTS: >-
+        -Doracle.jdbc.timezoneAsRegion=false
+      LOGGING_SCRIPT_DEBUG: 'true'
+      ENABLE_ACCESS_LOG: 'true'
+      RESOURCES: ORACLEDB
+      ORACLEDB_NAME: jdbc/oracledb
+      ORACLEDB_DRIVER: oracle.jdbc.driver.OracleDriver
+      ORACLEDB_URL: jdbc:oracle:thin:@//oracle-db:1521/xe
+      ORACLEDB_USERNAME: dbuser
+      ORACLEDB_PASSWORD: dbpassword
+      ORACLEDB_FACTORY: org.apache.tomcat.jdbc.pool.DataSourceFactory
+      ORACLEDB_TYPE: javax.sql.DataSource
+#      ORACLEDB_PROTOCOL
+#      ORACLEDB_HOST
+#      ORACLEDB_PORT
+#      ORACLEDB_NAME
+#      ORACLEDB_USERNAME
+#      ORACLEDB_PASSWORD
+#      ORACLEDB_DATABASE
+#      ORACLEDB_DRIVER
+#      ORACLEDB_TYPE
+#      ORACLEDB_VALIDATION_QUERY
+#      ORACLEDB_AUTH
+#      ORACLEDB_MAX_WAIT
+#      ORACLEDB_MAX_IDLE
+#      ORACLEDB_TEST_WHEN_IDLE
+#      ORACLEDB_TEST_ON_BORROW
+#      ORACLEDB_FACTORY
+#      ORACLEDB_URL
+#      ORACLEDB_TRANSACTION_ISOLATION
+#      ORACLEDB_MIN_IDLE
+#      ORACLEDB_MAX_ACTIVE
+
+    depends_on:
+      - oracle-db
+
+  oracle-db:
+    image: oracleinanutshell/oracle-xe-11g:latest
+    ports:
+      - 1521:1521
+    environment:
+      ORACLE_ALLOW_REMOTE: 'true'
+    volumes:
+      - ./db/sql/:/docker-entrypoint-initdb.d/

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-map xmlns="http://cayenne.apache.org/schema/3.0/modelMap"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://cayenne.apache.org/schema/3.0/modelMap http://cayenne.apache.org/schema/3.0/modelMap.xsd"
+          project-version="6">
+    <property name="defaultPackage" value="com.redhat.saiello.data"/>
+    <db-entity name="BLOG_POST">
+        <db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+        <db-attribute name="TITLE" type="VARCHAR" length="500"/>
+        <db-attribute name="DESCRIPTION" type="VARCHAR" length="500"/>
+        <db-attribute name="CREATED" type="TIMESTAMP" length="7"/>
+        <db-key-generator>
+            <db-generator-type>ORACLE</db-generator-type>
+            <db-generator-name>BLOG_SEQ</db-generator-name>
+            <db-key-cache-size>1</db-key-cache-size>
+        </db-key-generator>
+    </db-entity>
+    <obj-entity name="BlogPost" className="com.redhat.saiello.data.BlogPost" readOnly="true" dbEntityName="BLOG_POST">
+        <obj-attribute name="id" type="java.lang.Integer" db-attribute-path="ID"/>
+        <obj-attribute name="title" type="java.lang.String" db-attribute-path="TITLE"/>
+        <obj-attribute name="description" type="java.lang.String" db-attribute-path="DESCRIPTION"/>
+        <obj-attribute name="created" type="java.util.Date" db-attribute-path="CREATED"/>
+    </obj-entity>
+</data-map>
