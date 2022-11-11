@@ -1,0 +1,4 @@
+
+if [[ ${AB_JMX_PROMETHEUS_EXPORTER} == 'true' ]]; then
+echo "-javaagent:/opt/jws-5.6/tomcat/lib/jmx_prometheus_javaagent.jar=${AB_JMX_PROMETHEUS_EXPORTER_PORT:-9404}:/opt/jws-5.6/tomcat/conf/config.yaml"
+fi

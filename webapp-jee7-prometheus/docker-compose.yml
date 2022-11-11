@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+
+  webapp:
+
+    build: 
+      context: .
+      args: 
+        prometheus_agent: jmx_prometheus_javaagent-0.17.2.jar
+
+    ports:
+      - 8080:8080
+      - 8778:8778
+      - 9404:9404
+
+    environment:
+      ENABLE_ACCESS_LOG: 'true'
+      AB_JMX_PROMETHEUS_EXPORTER: 'true'
+      AB_JMX_PROMETHEUS_EXPORTER_PORT: 9404
+
