@@ -1,0 +1,79 @@
+version: '2.1'
+services:
+  zookeeper:
+    image: quay.io/debezium/zookeeper:${DEBEZIUM_VERSION}
+    ports:
+      - 2181:2181
+      - 2888:2888
+      - 3888:3888
+
+  kafka:
+    image: quay.io/debezium/kafka:${DEBEZIUM_VERSION}
+    ports:
+      - 9092:9092
+    links:
+      - zookeeper
+    environment:
+      - ZOOKEEPER_CONNECT=zookeeper:2181
+
+  bankdb:
+    image: quay.io/debezium/example-postgres:${DEBEZIUM_VERSION}
+    ports:
+      - 5433:5432
+    healthcheck:
+      test: "pg_isready -U postgresuser -d bankdb"
+      interval: 2s
+      timeout: 20s
+      retries: 10
+    environment:
+      - POSTGRES_USER=postgresuser
+      - POSTGRES_PASSWORD=postgrespw
+      - POSTGRES_DB=bankdb
+      - PGPASSWORD=postgrespw
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    volumes:
+      - ./servers.json:/pgadmin4/servers.json
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+
+  connect:
+    image: debezium/connect
+    ports:
+      - 8083:8083
+    links:
+      - kafka
+      - bankdb
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_connect_statuses
+
+  bank-service:
+    image: outbox-bank-service:${DEBEZIUM_VERSION}
+    build:
+      context: .
+      dockerfile: src/main/docker/Dockerfile.${QUARKUS_BUILD:-jvm}
+    ports:
+      - 8080:8080
+    links:
+      - kafka
+      - bankdb
+    environment:
+      - QUARKUS_DEBEZIUM_OUTBOX_REMOVE_AFTER_INSERT=false
+      - QUARKUS_DATASOURCE_REACTIVE_URL=vertx-reactive:postgresql://bankdb:5432/bankdb
+      - QUARKUS_DATASOURCE_USERNAME=postgresuser
+      - QUARKUS_DATASOURCE_PASSWORD=postgrespw
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      bankdb:
+        condition: service_healthy
+      connect:
+        condition: service_started
+
