@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.util.function.Consumer;
 
 @Slf4j
 @ApplicationScoped
@@ -33,19 +34,19 @@ public class BankCommandHandler {
 
     public Uni<Void> deposit(DepositCommand command){
         log.info("Handle command: {}", command);
-        return repository.findById(command.accountId())
-                .onItem()
-                .invoke(account -> account.deposit(command.amount()))
-                .chain(account -> repository.save(account))
-                .replaceWithVoid();
+        return updateByCommand(command.accountId(), account -> account.deposit(command.amount()));
     }
 
 
     public Uni<Void> withdraw(WithdrawCommand command){
         log.info("Handle command: {}", command);
-        return repository.findById(command.accountId())
+        return updateByCommand(command.accountId(), account -> account.withdraw(command.amount()));
+    }
+
+    private Uni<Void> updateByCommand(String id, Consumer<BankAccount> bankAccountConsumer) {
+        return repository.findById(id)
                 .onItem()
-                .invoke(account -> account.withdraw(command.amount()))
+                .invoke(bankAccountConsumer)
                 .chain(account -> repository.save(account))
                 .replaceWithVoid();
     }

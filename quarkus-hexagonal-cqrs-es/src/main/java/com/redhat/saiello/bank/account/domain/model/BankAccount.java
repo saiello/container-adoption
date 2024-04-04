@@ -43,6 +43,27 @@ public class BankAccount extends AggregateRoot {
 
 
     protected void when(Event e){
+
+        /*
+
+        when(Event e){
+            a.apply(this);
+        }
+
+
+        class Event<T> {
+           apply(T aggregateRoot)
+        }
+
+        BankAccountCreated extends Event<BankAccount> {
+            apply(BankAccount aggregate){
+                aggregate.handle(this);
+            }
+        }
+
+        */
+
+        // e.apply(this)
         switch (e.getType()){
             case BankAccountCreated.TYPE -> handle(deserialize(e.getPayload(), BankAccountCreated.class));
             case AmountWithdrawn.TYPE -> handle(deserialize(e.getPayload(), AmountWithdrawn.class));
